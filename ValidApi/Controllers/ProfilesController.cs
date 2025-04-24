@@ -45,7 +45,7 @@ namespace ValidApi.Controllers
             if (_service.Parameters.TryGetValue(profileName, out var param))
                 return Ok(param); // Retorna o perfil, se existir.
 
-            return NotFound(); // Retorna 404 se o perfil não existir.
+            return NotFound("Perfil não encontrado."); 
         }
 
         /// <summary>
@@ -65,8 +65,12 @@ namespace ValidApi.Controllers
             if (_service.Parameters.ContainsKey(parameter.ProfileName))
                 return Conflict("Perfil já existe."); // Impede duplicação.
 
-            _service.Parameters[parameter.ProfileName] = parameter;
-            return CreatedAtAction(nameof(Get), new { profileName = parameter.ProfileName }, parameter);
+            // gera a URL usando o nome do método 'Get'.
+            var url = Url.Action(nameof(Get), new { profileName = parameter.ProfileName });
+
+            // retorna a resposta HTTP 201 (Criado) com a URL gerada e o perfil recém-criado.
+            return Created(url, parameter);
+
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace ValidApi.Controllers
         public IActionResult Update(string profileName, ProfileParameter parameter)
         {
             if (!_service.Parameters.ContainsKey(profileName))
-                return NotFound(); // Perfil inexistente.
+                NotFound("Perfil não encontrado.");
 
             _service.Parameters[profileName] = parameter;
             return NoContent(); // Atualizado com sucesso.
@@ -104,7 +108,7 @@ namespace ValidApi.Controllers
         public IActionResult Delete(string profileName)
         {
             if (!_service.Parameters.Remove(profileName))
-                return NotFound(); // Não encontrado.
+                NotFound("Perfil não encontrado.");
 
             return NoContent(); // Removido com sucesso.
         }
@@ -129,13 +133,24 @@ namespace ValidApi.Controllers
                 if (string.IsNullOrWhiteSpace(action))
                     return BadRequest("A ação não foi especificada.");
 
-                if (!param.Parameters.ContainsKey(action))
-                    return BadRequest($"A ação '{action}' é inválida.");
+                var validActions = new[] { "CanEdit", "CanDelete" };
+                if (!validActions.Contains(action, StringComparer.OrdinalIgnoreCase))
+                    return BadRequest($"A ação '{action}' não é válida.");
 
-                return Ok(param.Parameters[action] == "true");
+                if (!param.Parameters.TryGetValue(action, out var value))
+                    return BadRequest($"A ação '{action}' não está configurada para o perfil '{profileName}'.");
+
+                bool hasPermission = value == "true";
+                return Ok(new
+                {
+                    success = hasPermission,
+                    message = hasPermission
+                        ? $"O perfil '{profileName}' tem permissão para '{action}'."
+                        : $"O perfil '{profileName}' não tem permissão para '{action}'."
+                });
             }
 
-            return NotFound(); // Perfil inexistente.
+            return NotFound("Perfil não encontrado."); // Perfil inexistente.
         }
     }
 }
