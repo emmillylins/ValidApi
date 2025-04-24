@@ -65,13 +65,23 @@ namespace ValidApi.Controllers
             if (_service.Parameters.ContainsKey(parameter.ProfileName))
                 return Conflict("Perfil já existe."); // Impede duplicação.
 
-            // gera a URL usando o nome do método 'Get'.
+            // Define as únicas ações válidas
+            var acoesValidas = new[] { "CanEdit", "CanDelete" };
+
+            // Verifica se todas as chaves do dicionário são válidas
+            if (parameter.Parameters == null || !parameter.Parameters.Keys.All(k => acoesValidas.Contains(k)))
+                return BadRequest("Parâmetros inválidos. Apenas 'CanEdit' e 'CanDelete' são permitidos.");
+
+            // Gera a URL usando o nome do método 'Get'
             var url = Url.Action(nameof(Get), new { profileName = parameter.ProfileName });
 
-            // retorna a resposta HTTP 201 (Criado) com a URL gerada e o perfil recém-criado.
-            return Created(url, parameter);
+            // Adiciona o novo perfil
+            _service.Parameters[parameter.ProfileName] = parameter;
 
+            // Retorna 201 com o perfil criado
+            return Created(url, parameter);
         }
+
 
         /// <summary>
         /// Atualiza os parâmetros de um perfil existente.
@@ -89,11 +99,21 @@ namespace ValidApi.Controllers
         public IActionResult Update(string profileName, ProfileParameter parameter)
         {
             if (!_service.Parameters.ContainsKey(profileName))
-                NotFound("Perfil não encontrado.");
+                return NotFound("Perfil não encontrado.");
 
+            // Define as ações permitidas
+            var acoesValidas = new[] { "CanEdit", "CanDelete" };
+
+            // Verifica se o dicionário de parâmetros é válido
+            if (parameter.Parameters == null || !parameter.Parameters.Keys.All(k => acoesValidas.Contains(k)))
+                return BadRequest("Parâmetros inválidos. Apenas 'CanEdit' e 'CanDelete' são permitidos.");
+
+            // Atualiza o perfil
             _service.Parameters[profileName] = parameter;
-            return NoContent(); // Atualizado com sucesso.
+
+            return NoContent(); // Atualizado com sucesso
         }
+
 
         /// <summary>
         /// Remove um perfil pelo nome.
