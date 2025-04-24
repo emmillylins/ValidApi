@@ -1,4 +1,5 @@
 using System.Reflection;
+using ValidApi.Filters;
 using ValidApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSingleton<IProfileParameterService, ProfileParameterService>();
 builder.Services.AddHostedService<ProfileParameterUpdater>();
 builder.Services.AddControllers();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SchemaFilter<ProfileParameterSchemaFilter>();
+});
 
 var app = builder.Build();
 

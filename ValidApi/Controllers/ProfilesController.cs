@@ -16,7 +16,8 @@ namespace ValidApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProfileParameter>> GetAll() => Ok(_service.Parameters.Values);
+        public ActionResult<IEnumerable<ProfileParameter>> GetAll()
+            => Ok(_service.Parameters.Values);
 
         [HttpGet("{profileName}")]
         public ActionResult<ProfileParameter> Get(string profileName)
@@ -68,4 +69,5 @@ namespace ValidApi.Controllers
             return NotFound();
         }
     }
+
 }
