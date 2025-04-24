@@ -6,12 +6,13 @@ namespace ValidApi.Services
     {
         public Dictionary<string, ProfileParameter> Parameters { get; private set; } = new();
 
+        // Carrega os parâmetros de perfil 'mockados'.
         public void LoadParameters()
         {
             Parameters = new Dictionary<string, ProfileParameter>
             {
                 ["Admin"] = new ProfileParameter
-                {
+                { 
                     ProfileName = "Admin",
                     Parameters = new Dictionary<string, string>
                     {
@@ -30,5 +31,6 @@ namespace ValidApi.Services
                 }
             };
         }
+
     }
 }
