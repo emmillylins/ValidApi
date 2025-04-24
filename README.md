@@ -70,6 +70,8 @@ A cada **5 minutos**, um serviço em background atualiza o valor de `CanEdit` pa
   - ProfileParameterUpdater.cs
 /Controllers
   - ProfilesController.cs
+/Filters
+ - ProfileParameterSchemaFilter.cs
 Program.cs
 README.md
 ```
