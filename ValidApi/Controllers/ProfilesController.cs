@@ -126,11 +126,13 @@ namespace ValidApi.Controllers
         {
             if (_service.Parameters.TryGetValue(profileName, out var param))
             {
-                // Retorna true se a permissão estiver como "true", senão false.
-                if (param.Parameters.TryGetValue(action, out var value) && value == "true")
-                    return Ok(true);
+                if (string.IsNullOrWhiteSpace(action))
+                    return BadRequest("A ação não foi especificada.");
 
-                return Ok(false);
+                if (!param.Parameters.ContainsKey(action))
+                    return BadRequest($"A ação '{action}' é inválida.");
+
+                return Ok(param.Parameters[action] == "true");
             }
 
             return NotFound(); // Perfil inexistente.
